@@ -1,4 +1,5 @@
 # Proposals
+
 My ideas for my final project are...
 
 Week 4 – Create a basic web app with a (Recipe +) button that opens a form to create the recipe and some input validation – Some UI design and learn how to incorporate Food Nutrition API (https://esha.com/products/nutrition-database-api/) or (https://developer.edamam.com/food-database-api-docs) or (https://www.calorieking.com/us/en/developers/food-api/)
