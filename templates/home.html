@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>HOMEPAGE</h1>
+    {% for recipe in recipes %}
+        <article class="media content-section">
+            <div class="media-body">
+              <div class="article-metadata">
+                <a class="mr-2" href="#">{{ recipe.author }}</a>
+                <small class="text-muted">{{ recipe.ingredient }}</small>
+              </div>
+              <h2><a class="article-title" href="#">{{ recipe.recipe_name }}</a></h2>
+              <p class="article-content">{{ recipe.calories }}</p>
+            </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
