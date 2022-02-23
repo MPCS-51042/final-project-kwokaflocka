@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+    <!-- <h1>HOMEPAGE</h1>
+     -->
+
+     <article class="media content-section">
+       
+
+        <div class="media-body">
+            <h2>{{ recipe_name }}</a></h2>
+            <p><a class="article-title" href="{{recipe_link}}">{{ recipe_link }}</a></p>
+
+            <table class="table">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">Ingredient</th>
+                    <th scope="col">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient, amount_unit in recipe_ingredients.items() %}
+                        <tr>
+                            <td>{{ ingredient }}</td>
+                            <td>{{ amount_unit.0 }} {{ amount_unit.1}}</td>
+                        </tr>
+                    {% endfor %}
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+     </article>
+
+{% endblock content %}

@@ -2,31 +2,18 @@
 {% block content %}
     <!-- <h1>HOMEPAGE</h1>
      -->
-    <!-- {% for recipe, ingredients in recipes.items() %}
-      <div>{{ recipe }}</div>
-      {% for ingredient, amount_unit in ingredients.items() %}
-        <div>
-          <span>{{ ingredient }}: {{ amount_unit }}</span>
-        </div>
-      {% endfor %}
-    {% endfor %} -->
-
-
-    {% for recipe, ingredients in recipes.items() %}
-        <article class="media content-section">
-          <div class="media-body">
-            <div class="article-metadata">
-              <a class="mr-2" href="#">{{ recipe }}</a>
-            </div>
-            <h2><a class="article-title" href="#">{{ recipe }}</a></h2>
-              {% for ingredient, amount_unit in ingredients.items() %}
-                <p class="article-content">{{ingredient}}: {{ amount_unit }}</p>
-              {% endfor %}
-          </div>
-      </article>
+     {% for recipe, ingredients_and_info in recipes.items() %}
+     <article class="media content-section">
+       <div class="media-body">
+         <div class="article-metadata">
+          {% for categories in ingredients_and_info.1 %}
+            <a class="mr-2" href="{{ url_for('tag_page', chosen_tag = categories)}}">{{ categories }}</a>
+          {% endfor %}
+         </div>
+         <h2><a class="article-title" href="{{ url_for('recipe_page', recipe_name = recipe)}}">{{ recipe }}</a></h2>
+         <p><a class="article-title" href="{{ingredients_and_info.2.0}}">{{ ingredients_and_info.2.0 }}</a></p>
+       </div>
+     </article>
     {% endfor %}
-
-
-
 
 {% endblock content %}

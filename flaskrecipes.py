@@ -21,12 +21,32 @@ app = Flask(__name__)
 # ]
 
 recipes = Recipes()
-test = recipes.all()
+recipes_obj = recipes.all()
 
 @app.route("/")
+@app.route("/recipes", methods=["GET"])
 # @app.route("/home")
 def home_page():
-    return render_template('home.html', recipes=(recipes.all()))
+    return render_template('home.html', recipes=recipes_obj)
+
+
+@app.route("/recipe/<recipe_name>", methods=["GET"])
+def recipe_page(recipe_name):
+    recipe_ingredients= recipes_obj[recipe_name][0]
+    recipe_link = recipes_obj[recipe_name][2][0]
+    return render_template('display_recipe.html', recipe_name = recipe_name, recipe_link = recipe_link, recipe_ingredients=recipe_ingredients)
+
+@app.route("/recipes/<chosen_tag>", methods=["GET"])
+def tag_page(chosen_tag):
+    recipe_of_chosen_category = {}
+    for indiv_recipe in recipes_obj:
+        if chosen_tag in recipes_obj[indiv_recipe][1]:
+            recipe_of_chosen_category[indiv_recipe] = recipes_obj[indiv_recipe]
+    return render_template('home.html', recipes = recipe_of_chosen_category)
+    # recipe_ingredients= recipes_obj[recipe_name][0]
+    # recipe_link = recipes_obj[recipe_name][2][0]
+    # return render_template('display_recipe.html', recipe_name = recipe_name, recipe_link = recipe_link, recipe_ingredients=recipe_ingredients)
+
 
 # @app.route("/favorites")
 # def about_page():
