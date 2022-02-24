@@ -29,7 +29,7 @@ class Recipe():
         calorie_api_query_string = "/v1/nutrition?query="
         for ingredient in self.recipe_ingredients:
             amount_unit = self.recipe_ingredients[ingredient]
-            calorie_api_query_string += f"{amount_unit[0]}{amount_unit[1]} {ingredient},"
+            calorie_api_query_string += f"{amount_unit[0]}{amount_unit[1]}{ingredient},"
 
 
         conn.request("GET", calorie_api_query_string, headers=headers)
