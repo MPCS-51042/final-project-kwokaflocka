@@ -1,47 +1,42 @@
 from flask import Flask, render_template, url_for, flash, redirect
 from recipes import Recipes
+from recipe import Recipe
+
 app = Flask(__name__)
 
-# #generate using secrets module
-# app.config['SECRET_KEY'] = '827113b2ab268dadc058d67ecc0dca6fe2948a2db8097341'
-
-# recipes = [
-#     {
-#         "author": "Sally",
-#         "recipe_name": "chicken alfredo",
-#         "ingredient": "chicken",
-#         "calories": "120"
-#     },
-#     {
-#         "author": "Alan",
-#         "recipe_name": "noodles",
-#         "ingredient": "soup",
-#         "calories": "300"
-#     }
-# ]
-
 recipes = Recipes()
-recipes_obj = recipes.all()
+recipes_dict = recipes.all_dicts()
+recipes_objs = recipes.all_objs()
+
+#get the calories:
+# specific_dish = recipes_objs["Fresh Pasta"]
+# calories = specific_dish.get_ingredient_calories()
+# print(type(calories))
+
 
 @app.route("/")
 @app.route("/recipes", methods=["GET"])
-# @app.route("/home")
 def home_page():
-    return render_template('home.html', recipes=recipes_obj)
+    return render_template('home.html', recipes=recipes_dict)
 
 
 @app.route("/recipe/<recipe_name>", methods=["GET"])
 def recipe_page(recipe_name):
-    recipe_ingredients= recipes_obj[recipe_name][0]
-    recipe_link = recipes_obj[recipe_name][2][0]
+    recipe_ingredients= recipes_dict[recipe_name][0]
+    recipe_link = recipes_dict[recipe_name][2][0]
+
+    # #get the calories:
+    # specific_dish = recipes_objs[recipe_name]
+    # calories = specific_dish.get_ingredient_calories()
+    # print(calories)
     return render_template('display_recipe.html', recipe_name = recipe_name, recipe_link = recipe_link, recipe_ingredients=recipe_ingredients)
 
 @app.route("/recipes/<chosen_tag>", methods=["GET"])
 def tag_page(chosen_tag):
     recipe_of_chosen_category = {}
-    for indiv_recipe in recipes_obj:
-        if chosen_tag in recipes_obj[indiv_recipe][1]:
-            recipe_of_chosen_category[indiv_recipe] = recipes_obj[indiv_recipe]
+    for indiv_recipe in recipes_dict:
+        if chosen_tag in recipes_dict[indiv_recipe][1]:
+            recipe_of_chosen_category[indiv_recipe] = recipes_dict[indiv_recipe]
     return render_template('home.html', recipes = recipe_of_chosen_category)
     # recipe_ingredients= recipes_obj[recipe_name][0]
     # recipe_link = recipes_obj[recipe_name][2][0]

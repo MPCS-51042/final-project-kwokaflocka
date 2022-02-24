@@ -1,9 +1,11 @@
 from pandas import *
 from recipe import Recipe
+import http.client
 
 class Recipes():
     _recipes = {}
     _recipe_names = []
+    _recipe_objs = {}
 
     def __init__(self):
         self.populateRecipeBook()
@@ -28,22 +30,35 @@ class Recipes():
 
             ingredient_info_dict = {}
             for i in range(len(ingredients)):
+                #putting the amount and unit of the ingredient as a tuple, with the ingredient as its key
                 ingredient_info_dict[ingredients[i]] = (amount[i], unit[i])
 
-            #recipe_obj = Recipe(sheet[0], link[0], ingredient_info_dict, categories)
-            #sheet_to_df_map[sheet[0]] = recipe_obj
+            recipe_obj = Recipe(sheet[0], link[0], ingredient_info_dict, categories)
+            self._recipe_objs[sheet[0]] = recipe_obj
+
+            #adding all the recipe names (sheet names) to a list
             self._recipe_names.append(sheet[0])
+
+            #main dictionary of dictionaries: 
+            # name of dish = key
+            # list containing the {ingredient: (amount, unit)}, list of food categories, and the recipe link
             sheet_to_df_map[sheet[0]] = [ingredient_info_dict, categories, link]
         self._recipes = sheet_to_df_map
+
+
+################################
 
     def get(self, key):
         return self._recipes[key]
 
     def put(self, key, value):
         self._recipes[key] = value
-
-    def all(self):
+    
+    def all_dicts(self):
         return self._recipes
+
+    def all_objs(self):
+        return self._recipe_objs
 
     def get_recipe_names(self):
         return self._recipe_names
