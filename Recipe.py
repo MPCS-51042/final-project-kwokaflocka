@@ -27,45 +27,9 @@ class Recipe():
     def get_nutrition(self):
         nutrition_per_ingredient = {}
 
-        calorie_api_query_string = "/v1/nutrition?query="
         for ingredient in self.recipe_ingredients:
-            amount_unit = self.recipe_ingredients[ingredient]
-            calorie_api_query_string += f"{amount_unit[0]} {amount_unit[1]} {ingredient},"
-            calorie_api_query_string = calorie_api_query_string.replace(" ", "%20")
-            
-            #print(calorie_api_query_string)
-            conn.request("GET", calorie_api_query_string, headers=headers)
-            res = conn.getresponse()
-            #byte of dictionary
-            data = res.read()
+            nutrition_per_ingredient[ingredient] = self.calculate_nutrition_one_ingredient(ingredient)
 
-            #convert into Python dictionary
-            data_as_dict_str = data.decode("UTF-8")
-            data_dict = ast.literal_eval(data_as_dict_str)
-
-            #trying to put formatted amount unit into the dictionary with proper singular vs. plural forms
-            amount = amount_unit[0]
-            units = amount_unit[1]
-            amount_unit_string = f"{amount} "
-            if float(amount) > 1:
-                if units != "whole":
-                    amount_unit_string += f"{units}s"
-                else:
-                    if ingredient[-1] != "s":
-                        amount_unit_string += f"{ingredient.lower()}s"
-                    else:
-                        amount_unit_string += f"{ingredient.lower()}"
-            else:
-                amount_unit_string += f"{units}"
-
-            #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯
-            data_dict = data_dict["items"]
-            data_dict.insert(0, f"{amount_unit_string}")
-
-            #print(type(data_dict))
-            nutrition_per_ingredient[ingredient] = data_dict
-
-            calorie_api_query_string = "/v1/nutrition?query="
         return nutrition_per_ingredient
 
     def get_nutrition_value(self, diet):
@@ -91,42 +55,38 @@ class Recipe():
         
         return (self.recipe_name, nutrition_value_recipe)
             
-    def calculate_nutrition__one_recipe():
+    def calculate_nutrition_one_ingredient(self, ingredient, calorie_api_query_string = "/v1/nutrition?query="):
         amount_unit = self.recipe_ingredients[ingredient]
-            calorie_api_query_string += f"{amount_unit[0]} {amount_unit[1]} {ingredient},"
-            calorie_api_query_string = calorie_api_query_string.replace(" ", "%20")
+        calorie_api_query_string += f"{amount_unit[0]} {amount_unit[1]} {ingredient},"
+        calorie_api_query_string = calorie_api_query_string.replace(" ", "%20")
             
-            #print(calorie_api_query_string)
-            conn.request("GET", calorie_api_query_string, headers=headers)
-            res = conn.getresponse()
-            #byte of dictionary
-            data = res.read()
+        #print(calorie_api_query_string)
+        conn.request("GET", calorie_api_query_string, headers=headers)
+        res = conn.getresponse()
+        #byte of dictionary
+        data = res.read()
 
-            #convert into Python dictionary
-            data_as_dict_str = data.decode("UTF-8")
-            data_dict = ast.literal_eval(data_as_dict_str)
+        #convert into Python dictionary
+        data_as_dict_str = data.decode("UTF-8")
+        data_dict = ast.literal_eval(data_as_dict_str)
 
-            #trying to put formatted amount unit into the dictionary with proper singular vs. plural forms
-            amount = amount_unit[0]
-            units = amount_unit[1]
-            amount_unit_string = f"{amount} "
-            if float(amount) > 1:
-                if units != "whole":
-                    amount_unit_string += f"{units}s"
-                else:
-                    if ingredient[-1] != "s":
-                        amount_unit_string += f"{ingredient.lower()}s"
-                    else:
-                        amount_unit_string += f"{ingredient.lower()}"
+        #trying to put formatted amount unit into the dictionary with proper singular vs. plural forms
+        amount = amount_unit[0]
+        units = amount_unit[1]
+        amount_unit_string = f"{amount} "
+        if float(amount) > 1:
+            if units != "whole":
+                amount_unit_string += f"{units}s"
             else:
-                amount_unit_string += f"{units}"
+                if ingredient[-1] != "s":
+                    amount_unit_string += f"{ingredient.lower()}s"
+                else:
+                    amount_unit_string += f"{ingredient.lower()}"
+        else:
+            amount_unit_string += f"{units}"
 
-            #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯
-            data_dict = data_dict["items"]
-            data_dict.insert(0, f"{amount_unit_string}")
+        #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯
+        data_dict = data_dict["items"]
+        data_dict.insert(0, f"{amount_unit_string}")
 
-            #print(type(data_dict))
-            nutrition_per_ingredient[ingredient] = data_dict
-
-            calorie_api_query_string = "/v1/nutrition?query="    
-        pass
+        return data_dict

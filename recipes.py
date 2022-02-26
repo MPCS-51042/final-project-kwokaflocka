@@ -1,6 +1,7 @@
 from pandas import *
 from recipe import Recipe
 import http.client
+import re
 
 class Recipes():
     _recipes = {}
@@ -94,6 +95,17 @@ class Recipes():
     #     return self._recipes
 
     def put(self, name, link, ingredients_dict, categories):
+        #the user will probs give the amount_unit as a str, we want to store it as a tuple
+        for key in ingredients_dict:
+            amount_unit = ingredients_dict[key]
+            res = None
+            temp = re.search(r'[a-z]', amount_unit, re.I)
+            if temp is not None:
+                res = temp.start()
+                ingredients_dict[key] = (amount_unit[:res], amount_unit[res:])
+                print (res)
+
+
         new_recipe = Recipe(name, link, ingredients_dict, categories)
         self._recipe_objs[name] = new_recipe
         return new_recipe

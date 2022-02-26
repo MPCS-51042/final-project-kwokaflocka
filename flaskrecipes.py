@@ -52,11 +52,14 @@ def get_diet_recipe(recipe: RecipeModel):
     if len(recipe.recipe_ingredients) == 0:
         raise HTTPException(status_code=400, detail="Not a supported diet")
 
+    #ensure the amount of the ingredient is a combinations of (###str) so it is likely the 
+    #user has specified the amount of ingredients and a unit of measure
     regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
-    for key, value in  recipe.recipe_ingredients:
+    for key in  recipe.recipe_ingredients:
+        amount_unit = recipe.recipe_ingredients[key]
         regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
-        if not re.match(r"^\d*[.,]?\d*[a-zA-Z ]+$"):
-            raise HTTPException(status_code=400, detail="Not a supported diet")
+        if not regex_string.match(amount_unit):
+            raise HTTPException(status_code=400, detail="You must specific an ingredients amount with a unit of measurement. Ex: 1tbsp, 3whole, 1pinch")
     # print(recipe.recipe_name.lower())
     # print(recipe.recipe_link.lower())
     # print(recipe.recipe_ingredients)
