@@ -1,29 +1,75 @@
+import re
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import HTTPException
+from recipes import Recipes
+from recipe import Recipe
 
 app = FastAPI()
-#pp.db = DataBase()
+app.db = Recipes()
 
-class Book(BaseModel):
-    author: str
-    title: str
+class RecipeModel(BaseModel):
+    recipe_name: str
+    recipe_link: str
+    recipe_ingredients: dict
+    recipe_categories: list
 
 @app.get('/')
-def all_the_books():
-    return "hello"
+def all_the_recipes():
+    return app.db.all()
 
-# @app.get('/books')
-# def all_the_books():
-#     return app.db.all()
+@app.get('/recipes')
+def all_the_recipes():
+    return app.db.all()
 
-# @app.get('/books/{author_name}')
-# def get_books_of_author(author_name):
-#     author_name = author_name.lower()
-#     if author_name not in app.db.all():
-#         raise HTTPException(status_code=400, detail="Not an item in the database")
-#     return app.db.get(author_name)
+@app.get('/recipes/{recipe_name}')
+def get_specific_recipe(recipe_name):
+    recipe_name = recipe_name.lower()
+    if recipe_name not in app.db.all():
+        raise HTTPException(status_code=400, detail="Not an item in the database")
+    return app.db.get_recipe(recipe_name)
 
+@app.get('/recipes-nutrition/{recipe_name}')
+def get_recipe_nutrition(recipe_name):
+    recipe_name = recipe_name.lower()
+    if recipe_name not in app.db.all():
+        raise HTTPException(status_code=400, detail="Not an item in the database")
+    return app.db.get_recipe_nutrition(recipe_name)
+
+
+@app.get('/diet/{diet_name}')
+def get_diet_recipe(diet_name):
+    diet_name = diet_name.lower()
+    if diet_name not in app.db._diet_types:
+        raise HTTPException(status_code=400, detail="Not a supported diet")
+    return app.db.get_best_diet_options(diet_name)
+
+@app.post('/new-recipe')
+def get_diet_recipe(recipe: RecipeModel):
+    name = recipe.recipe_name.lower()
+    link = recipe.recipe_link.lower()
+
+    if len(recipe.recipe_ingredients) == 0:
+        raise HTTPException(status_code=400, detail="Not a supported diet")
+
+    regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
+    for key, value in  recipe.recipe_ingredients:
+        regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
+        if not re.match(r"^\d*[.,]?\d*[a-zA-Z ]+$"):
+            raise HTTPException(status_code=400, detail="Not a supported diet")
+    # print(recipe.recipe_name.lower())
+    # print(recipe.recipe_link.lower())
+    # print(recipe.recipe_ingredients)
+    # print(recipe.recipe_categories)
+
+    # if name:
+    #     raise HTTPException(status_code=400, detail="Not a supported diet")
+    return app.db.put(name, link, recipe.recipe_ingredients, recipe.recipe_categories)
+
+
+
+#json.dumps()
+ 
 # @app.post('/books')
 # def add_book(book_and_title: Book):
 #     book_and_title_dict = book_and_title.dict()
