@@ -22,7 +22,6 @@ class Recipe():
         self.recipe_ingredients = ingredients_dict
         self.category_dict = categories
         self.nutrition = self.get_nutrition()
-        pass
 
     def get_nutrition(self):
         nutrition_per_ingredient = {}
@@ -54,7 +53,9 @@ class Recipe():
             nutrition_value_recipe += nutrition_value_ingredient
         
         return (self.recipe_name, nutrition_value_recipe)
-            
+
+    # getting one ingredient at a time because the api will only return 2 at once anyways...maybe because its the 
+    # free version?       
     def calculate_nutrition_one_ingredient(self, ingredient, calorie_api_query_string = "/v1/nutrition?query="):
         amount_unit = self.recipe_ingredients[ingredient]
         calorie_api_query_string += f"{amount_unit[0]} {amount_unit[1]} {ingredient},"
@@ -86,6 +87,7 @@ class Recipe():
             amount_unit_string += f"{units}"
 
         #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯
+        #print(data_dict)
         data_dict = data_dict["items"]
         data_dict.insert(0, f"{amount_unit_string}")
 

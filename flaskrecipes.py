@@ -1,9 +1,10 @@
 import re
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from fastapi import HTTPException
 from recipes import Recipes
 from recipe import Recipe
+from typing import List, Optional
 
 app = FastAPI()
 app.db = Recipes()
@@ -14,6 +15,9 @@ class RecipeModel(BaseModel):
     recipe_ingredients: dict
     recipe_categories: list
 
+class IngredientsModel(BaseModel):
+    ingredients_list: list
+
 @app.get('/')
 def all_the_recipes():
     return app.db.all()
@@ -22,6 +26,7 @@ def all_the_recipes():
 def all_the_recipes():
     return app.db.all()
 
+#works
 @app.get('/recipes/{recipe_name}')
 def get_specific_recipe(recipe_name):
     recipe_name = recipe_name.lower()
@@ -29,6 +34,7 @@ def get_specific_recipe(recipe_name):
         raise HTTPException(status_code=400, detail="Not an item in the database")
     return app.db.get_recipe(recipe_name)
 
+#works
 @app.get('/recipes-nutrition/{recipe_name}')
 def get_recipe_nutrition(recipe_name):
     recipe_name = recipe_name.lower()
@@ -36,16 +42,39 @@ def get_recipe_nutrition(recipe_name):
         raise HTTPException(status_code=400, detail="Not an item in the database")
     return app.db.get_recipe_nutrition(recipe_name)
 
-
+#works
 @app.get('/diet/{diet_name}')
 def get_diet_recipe(diet_name):
     diet_name = diet_name.lower()
-    if diet_name not in app.db._diet_types:
+    if diet_name not in app.db.get_diets():
         raise HTTPException(status_code=400, detail="Not a supported diet")
     return app.db.get_best_diet_options(diet_name)
 
+#still working
+#the returned recipes are sorted in what is the best option objectively you have 
+#for successfully making hte recipe for the list of ingredients you have in your pantry 
+@app.get('/what_can_i_make/{recipe_name}')
+def get_close_recipes_with_recipe(recipe_name):
+    recipe_name = recipe_name.lower()
+    if recipe_name not in app.db.all():
+        raise HTTPException(status_code=400, detail="Not a recipe in the cook book :(")
+    return app.db.get_close_recipes(recipe_name)
+
+@app.get('/simplest/{ingredient_name}')
+def get_simplest(ingredient_name):
+    ingredient_name = ingredient_name.lower()
+    return app.db.get_simplest(ingredient_name)
+
+# {
+#   "recipe_name": "potato",
+#   "recipe_link": "www.potato.com",
+#   "recipe_ingredients": {"oil": "1tbsp", "potato": "3whole"},
+#   "recipe_categories": [
+#     "side dish"
+#   ]
+# }
 @app.post('/new-recipe')
-def get_diet_recipe(recipe: RecipeModel):
+def add_new_recipe(recipe: RecipeModel):
     name = recipe.recipe_name.lower()
     link = recipe.recipe_link.lower()
 
@@ -60,14 +89,39 @@ def get_diet_recipe(recipe: RecipeModel):
         regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
         if not regex_string.match(amount_unit):
             raise HTTPException(status_code=400, detail="You must specific an ingredients amount with a unit of measurement. Ex: 1tbsp, 3whole, 1pinch")
-    # print(recipe.recipe_name.lower())
-    # print(recipe.recipe_link.lower())
-    # print(recipe.recipe_ingredients)
-    # print(recipe.recipe_categories)
-
-    # if name:
-    #     raise HTTPException(status_code=400, detail="Not a supported diet")
     return app.db.put(name, link, recipe.recipe_ingredients, recipe.recipe_categories)
+
+
+# #TODO
+# @app.post('/update')
+# def update(recipe: RecipeModel):
+#     #update recipe ingredient
+#     pass
+
+# #TODO
+# @app.post('/notes')
+# def update(recipe: RecipeModel):
+#     pass
+
+# #TODO
+# @app.delete('/recipe')
+# def update(recipe: RecipeModel):
+#     pass
+
+# #TODO
+# @app.delete('/note')
+# def update(recipe: RecipeModel):
+#     pass
+
+#TODO
+# @app.delete('/book')
+# def update(recipe: RecipeModel):
+#     pass
+
+
+
+
+
 
 
 

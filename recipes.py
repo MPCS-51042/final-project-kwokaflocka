@@ -1,6 +1,5 @@
 from pandas import *
 from recipe import Recipe
-import http.client
 import re
 
 class Recipes():
@@ -29,6 +28,9 @@ class Recipes():
             unit = sheet[1]["Unit"].dropna().tolist()
             categories = sheet[1]["Category"].dropna().tolist()
             link = sheet[1]["Link"].dropna().tolist()
+
+            temp_to_lower = (map(lambda x: x.lower(), ingredients))
+            ingredients = list(temp_to_lower)
 
             ingredient_info_dict = {}
             for i in range(len(ingredients)):
@@ -60,6 +62,9 @@ class Recipes():
     def get_recipe_names(self):
         return self._recipe_names
 
+    def get_diets(self):
+        return self._diet_types
+
     def get_recipe_nutrition(self, key):
         return self._recipe_objs[key].nutrition
     
@@ -76,40 +81,53 @@ class Recipes():
 
         return recipe_to_nutrition_list
 
-        # return self._recipe_objs
-        # if diet_name == "keto":
-        #     pass
-        # elif "low" in diet_name:
-
-        #     pass
-        # else:
-        #     pass
-
-
-
-
-    # def all_objs(self):
-    #     return self._recipe_objs
-
-    # def all_dicts(self):
-    #     return self._recipes
-
     def put(self, name, link, ingredients_dict, categories):
         #the user will probs give the amount_unit as a str, we want to store it as a tuple
         for key in ingredients_dict:
             amount_unit = ingredients_dict[key]
-            res = None
+            #res = None
             temp = re.search(r'[a-z]', amount_unit, re.I)
             if temp is not None:
                 res = temp.start()
                 ingredients_dict[key] = (amount_unit[:res], amount_unit[res:])
-                print (res)
-
+                #print (res)
 
         new_recipe = Recipe(name, link, ingredients_dict, categories)
         self._recipe_objs[name] = new_recipe
         return new_recipe
 
+    def get_close_recipes(self, recipe):
+        base_ingredient_to_compare = self._recipe_objs[recipe].recipe_ingredients.keys()
+        base = set(base_ingredient_to_compare)
+
+        recipe_overlap = []
+        for key in self._recipe_objs:
+            if key != recipe:
+                recipe_ingredients_dict =  self._recipe_objs[key]
+                comparison_recipe_ingredients = recipe_ingredients_dict.recipe_ingredients.keys()
+                comparison = set(comparison_recipe_ingredients)
+
+                overlap = base & comparison
+                overlap_percentage = float(len(overlap)) / len(comparison) * 100
+                
+        recipe_overlap.sort(key=lambda x: x[1], reverse=True)
+        return recipe_overlap
+
+    def get_simplest(self, ingredient):
+        has_ingredient = []
+        for key in self._recipe_objs:
+            recipe_ingredients_dict =  self._recipe_objs[key]
+            recipe_ingredient_names = recipe_ingredients_dict.recipe_ingredients.keys()
+            #print(recipe_ingredient_names)
+            if ingredient in recipe_ingredient_names:
+                print(recipe_ingredients_dict.nutrition[ingredient])
+                ingredient_amount = recipe_ingredients_dict.nutrition[ingredient][0]
+                #it is very difficult to standardize the units, so use the calories as a proxy for how much 
+                #ingredient, irrespective of unit of measure
+                ingredient_calories = recipe_ingredients_dict.nutrition[ingredient][1]["calories"]
+                has_ingredient.append((key, ingredient_amount, ingredient_calories))
+            has_ingredient.sort(key=lambda x: x[2])
+        return has_ingredient
 
     def delete(self, key):
         self._recipes.pop(key)
