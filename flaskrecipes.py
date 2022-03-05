@@ -14,9 +14,14 @@ class RecipeModel(BaseModel):
     recipe_link: str
     recipe_ingredients: dict
     recipe_categories: list
+    recipe_note: str
 
 class IngredientsModel(BaseModel):
     ingredients_list: list
+
+class NotesModel(BaseModel):
+    recipe_name: str
+    recipe_note: str
 
 @app.get('/')
 def all_the_recipes():
@@ -89,8 +94,9 @@ def add_new_recipe(recipe: RecipeModel):
         regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
         if not regex_string.match(amount_unit):
             raise HTTPException(status_code=400, detail="You must specific an ingredients amount with a unit of measurement. Ex: 1tbsp, 3whole, 1pinch")
-    return app.db.put(name, link, recipe.recipe_ingredients, recipe.recipe_categories)
+    return app.db.put(name, link, recipe.recipe_ingredients, recipe.recipe_categories, recipe.recipe_note)
 
+#TEST
 
 # #TODO
 # @app.post('/update')
@@ -99,9 +105,12 @@ def add_new_recipe(recipe: RecipeModel):
 #     pass
 
 # #TODO
-# @app.post('/notes')
-# def update(recipe: RecipeModel):
-#     pass
+@app.post('/notes')
+def add_note(note_to_add: NotesModel):
+    recipe_name = recipe_name.lower()
+    if recipe_name not in app.db.all():
+        raise HTTPException(status_code=400, detail="Not an item in the database")
+    return app.db.add_note(note_to_add.recipe_name, note_to_add.recipe_note)
 
 @app.delete('/recipe')
 def delete_recipe(recipe_name):
@@ -110,15 +119,13 @@ def delete_recipe(recipe_name):
         raise HTTPException(status_code=400, detail="Not an item in the database")
     return app.db.delete_recipe(recipe_name)
 
-# #TODO
-# @app.delete('/note')
-# def update(recipe: RecipeModel):
-#     pass
+@app.delete('/note')
+def delete_note(recipe_name):
+    recipe_name = recipe_name.lower()
+    if recipe_name not in app.db.all():
+        raise HTTPException(status_code=400, detail="Not an item in the database")
+    return app.db.delete_note(recipe_name)
 
-#TODO
-# @app.delete('/book')
-# def update(recipe: RecipeModel):
-#     pass
 
 
 
