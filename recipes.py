@@ -129,6 +129,9 @@ class Recipes():
             has_ingredient.sort(key=lambda x: x[2])
         return has_ingredient
 
-    def delete(self, key):
-        self._recipes.pop(key)
-        return self._recipes
+    def delete_recipe(self, key):
+        self._recipe_objs.pop(key)
+        return self._recipe_objs
+
+    def delete_note(self, key):
+        self._recipe_objs[key]

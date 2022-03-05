@@ -92,3 +92,6 @@ class Recipe():
         data_dict.insert(0, f"{amount_unit_string}")
 
         return data_dict
+
+    def remove_note():
+        pass

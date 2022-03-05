@@ -103,10 +103,12 @@ def add_new_recipe(recipe: RecipeModel):
 # def update(recipe: RecipeModel):
 #     pass
 
-# #TODO
-# @app.delete('/recipe')
-# def update(recipe: RecipeModel):
-#     pass
+@app.delete('/recipe')
+def delete_recipe(recipe_name):
+    recipe_name = recipe_name.lower()
+    if recipe_name not in app.db.all():
+        raise HTTPException(status_code=400, detail="Not an item in the database")
+    return app.db.delete_recipe(recipe_name)
 
 # #TODO
 # @app.delete('/note')
