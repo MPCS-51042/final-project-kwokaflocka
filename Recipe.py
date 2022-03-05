@@ -16,12 +16,13 @@ class Recipe():
     #              {breakfast}}}
     #dictionary: ingredient: amount_unit
 
-    def __init__(self, name, link, ingredients_dict, categories = []):
+    def __init__(self, name, link, ingredients_dict, categories = [], notes = ""):
         self.recipe_name = name
         self.recipe_link = link
         self.recipe_ingredients = ingredients_dict
         self.category_dict = categories
         self.nutrition = self.get_nutrition()
+        self.notes = notes
 
     def get_nutrition(self):
         nutrition_per_ingredient = {}
@@ -93,5 +94,14 @@ class Recipe():
 
         return data_dict
 
-    def remove_note():
-        pass
+    def delete_note(self):
+        note_deleted = self.notes
+        self.notes = ""
+        return note_deleted
+
+    def add_note(self, note):
+        if self.notes == "":
+            self.notes = note
+        else:
+            self.notes += f"\n{note}"
+        return self.notes

@@ -81,7 +81,7 @@ class Recipes():
 
         return recipe_to_nutrition_list
 
-    def put(self, name, link, ingredients_dict, categories):
+    def put(self, name, link, ingredients_dict, categories, notes):
         #the user will probs give the amount_unit as a str, we want to store it as a tuple
         for key in ingredients_dict:
             amount_unit = ingredients_dict[key]
@@ -92,7 +92,7 @@ class Recipes():
                 ingredients_dict[key] = (amount_unit[:res], amount_unit[res:])
                 #print (res)
 
-        new_recipe = Recipe(name, link, ingredients_dict, categories)
+        new_recipe = Recipe(name, link, ingredients_dict, categories, notes)
         self._recipe_objs[name] = new_recipe
         return new_recipe
 
@@ -129,9 +129,13 @@ class Recipes():
             has_ingredient.sort(key=lambda x: x[2])
         return has_ingredient
 
+
+#TEST
+    def add_note(self, recipe_name, recipe_note):
+        return self._recipe_objs[recipe_name].add_note(recipe_note)
+
     def delete_recipe(self, key):
-        self._recipe_objs.pop(key)
-        return self._recipe_objs
+        return self._recipe_objs.pop(key)
 
     def delete_note(self, key):
-        self._recipe_objs[key]
+        return self._recipe_objs[key].delete_note()
