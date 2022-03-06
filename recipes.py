@@ -3,7 +3,6 @@ from recipe import Recipe
 import re
 
 class Recipes():
-    _recipes = {}
     _recipe_names = []
     _recipe_objs = {}
     _diet_types = ["keto", "low cal", "low fat", "low sugar", "low cholesterol", "high fiber", "high protein"]
@@ -12,7 +11,6 @@ class Recipes():
         self.populateRecipeBook()
 
     def populateRecipeBook(self):
-        sheet_to_df_map = {}
         xls = ExcelFile('recipe_ingredients.xls')
         sheet_names = xls.sheet_names
 
@@ -43,18 +41,9 @@ class Recipes():
             #adding all the recipe names (sheet names) to a list
             self._recipe_names.append(sheet[0].lower())
 
-            #main dictionary of dictionaries: 
-            # name of dish = key
-            # list containing the {ingredient: (amount, unit)}, list of food categories, and the recipe link
-            sheet_to_df_map[sheet[0].lower()] = [ingredient_info_dict, categories, link]
-        self._recipes = sheet_to_df_map
 
-
-################################
-
-    def get_recipe(self, key):
-        #print(key)
-        return self._recipe_objs[key]
+    def get_recipe(self, recipe_name):
+        return self._recipe_objs[recipe_name]
     
     def all(self):
         return self._recipe_objs
@@ -65,8 +54,8 @@ class Recipes():
     def get_diets(self):
         return self._diet_types
 
-    def get_recipe_nutrition(self, key):
-        return self._recipe_objs[key].nutrition
+    def get_recipe_nutrition(self, recipe_name):
+        return self._recipe_objs[recipe_name].nutrition
     
     def get_best_diet_options(self, diet_name):
         #holds tuples of (recipe name, nutrition_label)
@@ -108,6 +97,7 @@ class Recipes():
                 comparison = set(comparison_recipe_ingredients)
 
                 overlap = base & comparison
+                #SALLY
                 overlap_percentage = float(len(overlap)) / len(comparison) * 100
                 
         recipe_overlap.sort(key=lambda x: x[1], reverse=True)
@@ -117,25 +107,29 @@ class Recipes():
         has_ingredient = []
         for key in self._recipe_objs:
             recipe_ingredients_dict =  self._recipe_objs[key]
-            recipe_ingredient_names = recipe_ingredients_dict.recipe_ingredients.keys()
+            #recipe_ingredient_names = recipe_ingredients_dict.recipe_ingredients.keys()
             #print(recipe_ingredient_names)
-            if ingredient in recipe_ingredient_names:
-                print(recipe_ingredients_dict.nutrition[ingredient])
+            if ingredient in recipe_ingredients_dict.recipe_ingredients:
+                #print(recipe_ingredients_dict.nutrition[ingredient])
                 ingredient_amount = recipe_ingredients_dict.nutrition[ingredient][0]
                 #it is very difficult to standardize the units, so use the calories as a proxy for how much 
                 #ingredient, irrespective of unit of measure
                 ingredient_calories = recipe_ingredients_dict.nutrition[ingredient][1]["calories"]
                 has_ingredient.append((key, ingredient_amount, ingredient_calories))
-            has_ingredient.sort(key=lambda x: x[2])
+        has_ingredient.sort(key=lambda x: x[2])
         return has_ingredient
+#test
 
-
+    def update_recipe(self, recipe_name, ingredients):
+        return self._recipe_objs[recipe_name].update_ingredients(ingredients)
 #TEST
     def add_note(self, recipe_name, recipe_note):
         return self._recipe_objs[recipe_name].add_note(recipe_note)
 
+    def delete_note(self, recipe_name, note_number):
+        return self._recipe_objs[recipe_name].delete_note(note_number)
+
     def delete_recipe(self, key):
         return self._recipe_objs.pop(key)
 
-    def delete_note(self, key):
-        return self._recipe_objs[key].delete_note()
+    

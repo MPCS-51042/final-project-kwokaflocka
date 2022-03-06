@@ -1,5 +1,6 @@
 import http.client
 import ast
+import re
 
 conn = http.client.HTTPSConnection("calorieninjas.p.rapidapi.com")
 
@@ -9,14 +10,8 @@ headers = {
     }
 
 class Recipe():
-    #str: recipe name
-    #str: link
-    #dictionary: {favorite:
-    #             {dessert:
-    #              {breakfast}}}
-    #dictionary: ingredient: amount_unit
 
-    def __init__(self, name, link, ingredients_dict, categories = [], notes = ""):
+    def __init__(self, name, link, ingredients_dict, categories = [], notes = []):
         self.recipe_name = name
         self.recipe_link = link
         self.recipe_ingredients = ingredients_dict
@@ -94,14 +89,37 @@ class Recipe():
 
         return data_dict
 
-    def delete_note(self):
-        note_deleted = self.notes
-        self.notes = ""
+    def delete_note(self, note_number):
+        if note_number < 1 or note_number > len(self.notes):
+            return "That's not a valid note to delete"
+        else:
+            note_deleted = self.notes.pop(note_number-1)
         return note_deleted
 
     def add_note(self, note):
-        if self.notes == "":
-            self.notes = note
-        else:
-            self.notes += f"\n{note}"
+        self.notes.append(note)
         return self.notes
+
+    def update_ingredients(self, ingredients):
+        changed = []
+        in_original_dict = False
+        for ingredient in ingredients:
+            if ingredient in self.recipe_ingredients:
+                in_original_dict = True
+            else:
+                in_original_dict = False
+            amount_unit = ingredients[ingredient]
+            temp = re.search(r'[a-z]', amount_unit, re.I)
+            if temp is not None:
+                res = temp.start()
+                self.recipe_ingredients[ingredient] = (amount_unit[:res], amount_unit[res:])
+
+            if in_original_dict:
+                changed_notice = f"{ingredient} amount was changed from {ingredients[ingredient]} to {self.recipe_ingredients[ingredient][0]}{self.recipe_ingredients[ingredient][1]}."
+                changed.append(changed_notice)
+            else:
+                changed_notice = f"{ingredient} was added to the recipe."
+                changed.append(changed_notice)
+
+        return changed
+     
