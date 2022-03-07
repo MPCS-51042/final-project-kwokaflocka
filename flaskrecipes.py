@@ -66,9 +66,9 @@ def get_close_recipes_with_recipe(recipe_name):
     return app.db.get_close_recipes(recipe_name)
 
 @app.get('/simplest/{ingredient_name}')
-def get_simplest(ingredient_name):
+def running_low_on(ingredient_name):
     ingredient_name = ingredient_name.lower()
-    return app.db.get_simplest(ingredient_name)
+    return app.db.get_smallest_amount_recipe(ingredient_name)
 
 # {
 #   "recipe_name": "potato",
@@ -76,7 +76,8 @@ def get_simplest(ingredient_name):
 #   "recipe_ingredients": {"oil": "1tbsp", "potato": "3whole"},
 #   "recipe_categories": [
 #     "side dish"
-#   ]
+#   ],
+#   "recipe_note": "Feel free to use however much oil you want"
 # }
 @app.post('/new-recipe')
 def add_new_recipe(recipe: RecipeModel):
@@ -130,7 +131,7 @@ def delete_recipe(recipe_name):
     return app.db.delete_recipe(recipe_name)
 
 @app.delete('/note')
-def delete_note(recipe_name = str, note_number = int):
+def delete_note(recipe_name: str, note_number: int):
     recipe_name = recipe_name.lower()
     if recipe_name not in app.db.all():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")

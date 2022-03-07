@@ -8,9 +8,12 @@ class Recipes():
     _diet_types = ["keto", "low cal", "low fat", "low sugar", "low cholesterol", "high fiber", "high protein"]
 
     def __init__(self):
-        self.populateRecipeBook()
+        self.populate_recipe_book()
 
-    def populateRecipeBook(self):
+    def populate_recipe_book(self):
+        """
+        Reads an Excel document with some base recipes into Recipe objects in our RecipeBook
+        """
         xls = ExcelFile('recipe_ingredients.xls')
         sheet_names = xls.sheet_names
 
@@ -41,12 +44,11 @@ class Recipes():
             #adding all the recipe names (sheet names) to a list
             self._recipe_names.append(sheet[0].lower())
 
-
-    def get_recipe(self, recipe_name):
-        return self._recipe_objs[recipe_name]
-    
     def all(self):
         return self._recipe_objs
+    
+    def get_recipe(self, recipe_name):
+        return self._recipe_objs[recipe_name]
 
     def get_recipe_names(self):
         return self._recipe_names
@@ -79,17 +81,26 @@ class Recipes():
             if temp is not None:
                 res = temp.start()
                 ingredients_dict[key] = (amount_unit[:res], amount_unit[res:])
-                #print (res)
 
         new_recipe = Recipe(name, link, ingredients_dict, categories, notes)
         self._recipe_objs[name] = new_recipe
         return new_recipe
 
     def get_close_recipes(self, recipe):
+        """
+        Given a recipe, return the recipes that have some overlapping ingredients, sorted in percentage order of 
+        recipes that have the highest composition of the overlapping ingredients
+
+        Ex: Chrysanthemum tea ingredients: Water, tea leaves, sugar, ginger, milk
+        Regular Tea: Water, tea leaves || Overlap = Water, tea leaves || Overlap percentage = 100% (2/2)
+        Ginger tea: Water, ginger, jujubes, sugar || Overlap = Water, ginger, sugar || Overlap percentage = 75% (3/4)
+
+        If there is no overlap, we ignore the recipe
+        """
         base_ingredient_to_compare = self._recipe_objs[recipe].recipe_ingredients.keys()
         base = set(base_ingredient_to_compare)
-
         recipe_overlap = []
+
         for key in self._recipe_objs:
             if key != recipe:
                 recipe_ingredients_dict =  self._recipe_objs[key]
@@ -97,37 +108,49 @@ class Recipes():
                 comparison = set(comparison_recipe_ingredients)
 
                 overlap = base & comparison
-                #SALLY
-                overlap_percentage = float(len(overlap)) / len(comparison) * 100
-                
-        recipe_overlap.sort(key=lambda x: x[1], reverse=True)
-        return recipe_overlap
+                overlap_percentage = round(float(len(overlap)) / len(comparison) * 100, 2)
 
-    def get_simplest(self, ingredient):
+                if overlap_percentage != 0:
+                    recipe_overlap.append((key, overlap_percentage, overlap))
+
+        recipe_overlap.sort(key=lambda x: x[1], reverse=True)
+        
+        recipe_overlap_info = f"If you have ingredients for {recipe}, you have:"
+        for recipe in recipe_overlap:
+            recipe_overlap_info += f"\n{recipe[1]}% of ingredients for {recipe[0]} - {recipe[2]}"
+        return recipe_overlap_info
+
+    def get_smallest_amount_recipe(self, ingredient):
+        """
+        All recipes sorted in ascending order of the recipe having the least amount of the specified ingredient
+        Return the recipe with the least amount of said ingredient
+        """
         has_ingredient = []
         for key in self._recipe_objs:
             recipe_ingredients_dict =  self._recipe_objs[key]
-            #recipe_ingredient_names = recipe_ingredients_dict.recipe_ingredients.keys()
-            #print(recipe_ingredient_names)
+
             if ingredient in recipe_ingredients_dict.recipe_ingredients:
-                #print(recipe_ingredients_dict.nutrition[ingredient])
                 ingredient_amount = recipe_ingredients_dict.nutrition[ingredient][0]
                 #it is very difficult to standardize the units, so use the calories as a proxy for how much 
                 #ingredient, irrespective of unit of measure
                 ingredient_calories = recipe_ingredients_dict.nutrition[ingredient][1]["calories"]
                 has_ingredient.append((key, ingredient_amount, ingredient_calories))
-        has_ingredient.sort(key=lambda x: x[2])
-        return has_ingredient
-#test
+        
+        recipe_with_the_least = "No recipe has this ingredient."
+        if len(has_ingredient) > 1:
+            has_ingredient.sort(key=lambda x: x[2])
+            recipe_with_the_least = has_ingredient[0][0]
+
+        return recipe_with_the_least
 
     def update_recipe(self, recipe_name, ingredients):
         return self._recipe_objs[recipe_name].update_ingredients(ingredients)
-#TEST
+
     def add_note(self, recipe_name, recipe_note):
         return self._recipe_objs[recipe_name].add_note(recipe_note)
 
     def delete_note(self, recipe_name, note_number):
-        return self._recipe_objs[recipe_name].delete_note(note_number)
+        return self._recipe_objs[recipe_name].delete_note(note_number)     
 
     def delete_recipe(self, key):
         return self._recipe_objs.pop(key)

@@ -39,6 +39,7 @@ class Recipe():
                     "high protein": "protein_g"}
 
         nutrition_value_recipe = 0
+
         for ingredient in self.nutrition:
             if diet == "keto":
                 carbs = self.nutrition[ingredient][1]["carbohydrates_total_g"]
@@ -48,13 +49,13 @@ class Recipe():
                 nutrition_value_ingredient = self.nutrition[ingredient][1][diet_index[diet]]
             nutrition_value_recipe += nutrition_value_ingredient
         
-        return (self.recipe_name, nutrition_value_recipe)
+        return (self.recipe_name, round(nutrition_value_recipe,2))
 
     # getting one ingredient at a time because the api will only return 2 at once anyways...maybe because its the 
     # free version?       
     def calculate_nutrition_one_ingredient(self, ingredient, calorie_api_query_string = "/v1/nutrition?query="):
         amount_unit = self.recipe_ingredients[ingredient]
-        calorie_api_query_string += f"{amount_unit[0]} {amount_unit[1]} {ingredient},"
+        calorie_api_query_string += f"1 {amount_unit[1]} {ingredient},"
         calorie_api_query_string = calorie_api_query_string.replace(" ", "%20")
             
         #print(calorie_api_query_string)
@@ -82,12 +83,25 @@ class Recipe():
         else:
             amount_unit_string += f"{units}"
 
-        #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯
+        #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯, and the nutrition facts is a [{}]
         #print(data_dict)
         data_dict = data_dict["items"]
-        data_dict.insert(0, f"{amount_unit_string}")
+        multiplier = float(amount_unit[0])
+        multiplied_nutrition_dict = self.multiply_nutrition(data_dict[0], multiplier)
 
-        return data_dict
+        #ssalllllyy
+        finalized_nutrition_info = [f"{amount_unit_string}", multiplied_nutrition_dict]
+
+        return finalized_nutrition_info
+
+    def multiply_nutrition(self, nutrition_dict_unit_one, unit_multiplier):
+        nutrition_dict_multiplied = {}
+        for nutrition in nutrition_dict_unit_one:
+            value = nutrition_dict_unit_one[nutrition]
+            if isinstance(value, float):
+                float_value_multiplied = value * unit_multiplier
+                nutrition_dict_multiplied[nutrition] = round(float_value_multiplied,2)
+        return nutrition_dict_multiplied
 
     def delete_note(self, note_number):
         if note_number < 1 or note_number > len(self.notes):
@@ -103,23 +117,31 @@ class Recipe():
     def update_ingredients(self, ingredients):
         changed = []
         in_original_dict = False
+        original_amount = 0
         for ingredient in ingredients:
             if ingredient in self.recipe_ingredients:
                 in_original_dict = True
+                original_amount = self.recipe_ingredients[ingredient]
             else:
                 in_original_dict = False
             amount_unit = ingredients[ingredient]
             temp = re.search(r'[a-z]', amount_unit, re.I)
             if temp is not None:
                 res = temp.start()
-                self.recipe_ingredients[ingredient] = (amount_unit[:res], amount_unit[res:])
+                new_amount = round(float(amount_unit[:res]),2)
+                if new_amount == float(0):
+                    self.recipe_ingredients.pop(ingredient)
+                else: 
+                    self.recipe_ingredients[ingredient] = (round(float(amount_unit[:res]),2), amount_unit[res:])
 
             if in_original_dict:
-                changed_notice = f"{ingredient} amount was changed from {ingredients[ingredient]} to {self.recipe_ingredients[ingredient][0]}{self.recipe_ingredients[ingredient][1]}."
+                changed_notice = f"{ingredient} amount was changed from {original_amount[0]} {original_amount[1]} to {self.recipe_ingredients[ingredient][0]} {self.recipe_ingredients[ingredient][1]}."
                 changed.append(changed_notice)
             else:
                 changed_notice = f"{ingredient} was added to the recipe."
                 changed.append(changed_notice)
+
+        self.nutrition = self.get_nutrition()
 
         return changed
      
