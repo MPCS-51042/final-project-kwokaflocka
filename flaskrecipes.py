@@ -1,10 +1,9 @@
 import re
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import HTTPException
 from recipes import Recipes
 from recipe import Recipe
-from typing import List, Optional
 
 app = FastAPI()
 app.db = Recipes()
@@ -16,13 +15,6 @@ class RecipeModel(BaseModel):
     recipe_categories: list
     recipe_note: str
 
-class IngredientsModel(BaseModel):
-    ingredients_list: list
-
-class NotesModel(BaseModel):
-    recipe_name: str
-    recipe_note: str
-
 @app.get('/')
 def all_the_recipes():
     return app.db.all()
@@ -31,23 +23,20 @@ def all_the_recipes():
 def all_the_recipes():
     return app.db.all()
 
-#works
 @app.get('/recipes/{recipe_name}')
 def get_specific_recipe(recipe_name):
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     return app.db.get_recipe(recipe_name)
 
-#works
 @app.get('/recipes-nutrition/{recipe_name}')
 def get_recipe_nutrition(recipe_name):
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     return app.db.get_recipe_nutrition(recipe_name)
 
-#works
 @app.get('/diet/{diet_name}')
 def get_diet_recipe(diet_name):
     diet_name = diet_name.lower()
@@ -55,13 +44,10 @@ def get_diet_recipe(diet_name):
         raise HTTPException(status_code=404, detail="Not a supported diet")
     return app.db.get_best_diet_options(diet_name)
 
-#still working
-#the returned recipes are sorted in what is the best option objectively you have 
-#for successfully making hte recipe for the list of ingredients you have in your pantry 
 @app.get('/what-can-i-make/{recipe_name}')
 def get_close_recipes_with_recipe(recipe_name):
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     return app.db.get_close_recipes(recipe_name)
 
@@ -98,13 +84,11 @@ def add_new_recipe(recipe: RecipeModel):
 
     return app.db.put(name, link, recipe.recipe_ingredients, recipe.recipe_categories, recipe.recipe_note)
 
-#TEST
-
 @app.post('/update')
 def update(recipe_name: str, recipe_ingredients: dict):
     #update recipe ingredient
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     
     regex_string = re.compile(r"^\d*[.,]?\d*[a-zA-Z ]+$")
@@ -119,20 +103,20 @@ def update(recipe_name: str, recipe_ingredients: dict):
 @app.post('/notes')
 def add_note(recipe_name: str, note: str):
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     return app.db.add_note(recipe_name, note)
 
 @app.delete('/recipe')
 def delete_recipe(recipe_name):
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     return app.db.delete_recipe(recipe_name)
 
 @app.delete('/note')
 def delete_note(recipe_name: str, note_number: int):
     recipe_name = recipe_name.lower()
-    if recipe_name not in app.db.all():
+    if recipe_name not in app.db.get_recipe_names():
         raise HTTPException(status_code=404, detail="Not a recipe in the database")
     return app.db.delete_note(recipe_name, note_number)

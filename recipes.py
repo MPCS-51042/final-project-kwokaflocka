@@ -8,6 +8,9 @@ class Recipes():
     _diet_types = ["keto", "low cal", "low fat", "low sugar", "low cholesterol", "high fiber", "high protein"]
 
     def __init__(self):
+        """
+        Create a Recipes object with a list of recipes and corresponding dictionary of Recipe objects
+        """
         self.populate_recipe_book()
 
     def populate_recipe_book(self):
@@ -41,16 +44,25 @@ class Recipes():
             recipe_obj = Recipe(sheet[0].lower(), link[0], ingredient_info_dict, categories)
             self._recipe_objs[sheet[0].lower()] = recipe_obj
 
-            #adding all the recipe names (sheet names) to a list
+            #adding all the recipe names (sheet names) to a list for easier access
             self._recipe_names.append(sheet[0].lower())
 
     def all(self):
+        """
+        Return all the Recipe objects
+        """
         return self._recipe_objs
     
     def get_recipe(self, recipe_name):
+        """
+        Return a specified Recipe object
+        """
         return self._recipe_objs[recipe_name]
 
     def get_recipe_names(self):
+        """
+        Return all the 
+        """
         return self._recipe_names
 
     def get_diets(self):
@@ -152,7 +164,7 @@ class Recipes():
     def delete_note(self, recipe_name, note_number):
         return self._recipe_objs[recipe_name].delete_note(note_number)     
 
-    def delete_recipe(self, key):
-        return self._recipe_objs.pop(key)
+    def delete_recipe(self, recipe_name):
+        return self._recipe_objs.pop(recipe_name)
 
     
