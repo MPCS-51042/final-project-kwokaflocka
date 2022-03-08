@@ -2,11 +2,10 @@ import re
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import HTTPException
-from recipes import Recipes
-from recipe import Recipe
+from recipe_book import RecipeBook
 
 app = FastAPI()
-app.db = Recipes()
+app.db = RecipeBook()
 
 class RecipeModel(BaseModel):
     recipe_name: str

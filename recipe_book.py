@@ -2,7 +2,7 @@ from pandas import *
 from recipe import Recipe
 import re
 
-class Recipes():
+class RecipeBook():
     _recipe_names = []
     _recipe_objs = {}
     _diet_types = ["keto", "low cal", "low fat", "low sugar", "low cholesterol", "high fiber", "high protein"]
