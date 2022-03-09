@@ -41,6 +41,7 @@ class RecipeBook():
                 #putting the amount and unit of the ingredient as a tuple, with the ingredient as its key
                 ingredient_info_dict[ingredients[i]] = (amount[i], unit[i])
 
+            #create the Recipe object
             recipe_obj = Recipe(sheet[0].lower(), link[0], ingredient_info_dict, categories)
             self._recipe_objs[sheet[0].lower()] = recipe_obj
 
@@ -61,17 +62,31 @@ class RecipeBook():
 
     def get_recipe_names(self):
         """
-        Return all the 
+        Return all the recipe names
         """
         return self._recipe_names
 
     def get_diets(self):
+        """
+        Return all the supported diets
+        """
         return self._diet_types
 
     def get_recipe_nutrition(self, recipe_name):
+        """
+        Makes a call to the Recipe object nutrition function to obtain nutrition information for a single recipe
+
+        Returns a dictionary of nutrition information
+        """
         return self._recipe_objs[recipe_name].nutrition
     
     def get_best_diet_options(self, diet_name):
+        """
+        Returns a sorted list of recipes based on the important nutrition item
+
+        Ex: High protein -> sort from high to low on sum of protein content 
+        Low cal -> sort from low to high on sum of calories
+        """
         #holds tuples of (recipe name, nutrition_label)
         recipe_to_nutrition_list = []
         for recipe in self._recipe_objs:
@@ -85,6 +100,11 @@ class RecipeBook():
         return recipe_to_nutrition_list
 
     def put(self, name, link, ingredients_dict, categories, notes):
+        """
+        Given information for a recipe, create a Recipe object and add it to our Recipe Book
+
+        Return the new Recipe that was created and added
+        """
         #the user will probs give the amount_unit as a str, we want to store it as a tuple
         for key in ingredients_dict:
             amount_unit = ingredients_dict[key]
@@ -96,6 +116,7 @@ class RecipeBook():
 
         new_recipe = Recipe(name, link, ingredients_dict, categories, notes)
         self._recipe_objs[name] = new_recipe
+        self._recipe_names.append(name)
         return new_recipe
 
     def get_close_recipes(self, recipe):
@@ -135,6 +156,7 @@ class RecipeBook():
     def get_smallest_amount_recipe(self, ingredient):
         """
         All recipes sorted in ascending order of the recipe having the least amount of the specified ingredient
+
         Return the recipe with the least amount of said ingredient
         """
         has_ingredient = []
@@ -156,15 +178,36 @@ class RecipeBook():
         return recipe_with_the_least
 
     def update_recipe(self, recipe_name, ingredients):
+        """
+        Update a specific specific ingredient amount for the specified recipe
+
+        Return a list of ingredients that were altered or added, and in what amounts
+        """
         return self._recipe_objs[recipe_name].update_ingredients(ingredients)
 
     def add_note(self, recipe_name, recipe_note):
+        """
+        Add a note to the Recipe
+
+        Returns the full list of notes
+        """
         return self._recipe_objs[recipe_name].add_note(recipe_note)
 
     def delete_note(self, recipe_name, note_number):
+        """
+        Deletes the note in the specified index (starting from 1)
+
+        Returns the note that was deleted
+        """
         return self._recipe_objs[recipe_name].delete_note(note_number)     
 
     def delete_recipe(self, recipe_name):
+        """
+        Deletes a Recipe from the RecipeBook
+
+        Returns the recipe that was removed 
+        """
+        self._recipe_names.remove(recipe_name)
         return self._recipe_objs.pop(recipe_name)
 
     

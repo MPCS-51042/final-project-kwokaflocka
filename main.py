@@ -18,10 +18,6 @@ class RecipeModel(BaseModel):
 def all_the_recipes():
     return app.db.all()
 
-@app.get('/recipes')
-def all_the_recipes():
-    return app.db.all()
-
 @app.get('/recipes/{recipe_name}')
 def get_specific_recipe(recipe_name):
     recipe_name = recipe_name.lower()
@@ -55,15 +51,6 @@ def running_low_on(ingredient_name):
     ingredient_name = ingredient_name.lower()
     return app.db.get_smallest_amount_recipe(ingredient_name)
 
-# {
-#   "recipe_name": "potato",
-#   "recipe_link": "www.potato.com",
-#   "recipe_ingredients": {"oil": "1tbsp", "potato": "3whole"},
-#   "recipe_categories": [
-#     "side dish"
-#   ],
-#   "recipe_note": "Feel free to use however much oil you want"
-# }
 @app.post('/new-recipe')
 def add_new_recipe(recipe: RecipeModel):
     name = recipe.recipe_name.lower()

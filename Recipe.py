@@ -20,6 +20,9 @@ class Recipe():
         self.notes = notes
 
     def get_nutrition(self):
+        """
+        Creates and returns a dictionary of nutrition information
+        """
         nutrition_per_ingredient = {}
 
         for ingredient in self.recipe_ingredients:
@@ -28,7 +31,9 @@ class Recipe():
         return nutrition_per_ingredient
 
     def get_nutrition_value(self, diet):
-        #["keto", "low cal", "low fat", "low sugar", "low cholesterol", "high fiber", "high protein"]
+        """
+        Returns the summed nutritional amount for the relevant nutrition for a given diet
+        """
         if diet == "keto":
             pass
         
@@ -54,14 +59,19 @@ class Recipe():
     # getting one ingredient at a time because the api will only return 2 at once anyways...maybe because its the 
     # free version?       
     def calculate_nutrition_one_ingredient(self, ingredient, calorie_api_query_string = "/v1/nutrition?query="):
+        """
+        Creates a query string for the CalorieNinjas API and returns a dictionary of nutrition that accurately
+        reflects the amount of ingredient in the recipe
+
+        Querying for only one unit of the ingredient at a time as the info returned is more accurate this way
+        and the math to match the actual amount of ingredients is simple
+        """
         amount_unit = self.recipe_ingredients[ingredient]
         calorie_api_query_string += f"1 {amount_unit[1]} {ingredient},"
         calorie_api_query_string = calorie_api_query_string.replace(" ", "%20")
             
-        #print(calorie_api_query_string)
         conn.request("GET", calorie_api_query_string, headers=headers)
         res = conn.getresponse()
-        #byte of dictionary
         data = res.read()
 
         #convert into Python dictionary
@@ -84,17 +94,18 @@ class Recipe():
             amount_unit_string += f"{units}"
 
         #the API returns this to us in a dictionary where the key is "items" ¯\_(ツ)_/¯, and the nutrition facts is a [{}]
-        #print(data_dict)
         data_dict = data_dict["items"]
         multiplier = float(amount_unit[0])
         multiplied_nutrition_dict = self.multiply_nutrition(data_dict[0], multiplier)
-
-        #ssalllllyy
         finalized_nutrition_info = [f"{amount_unit_string}", multiplied_nutrition_dict]
 
         return finalized_nutrition_info
 
     def multiply_nutrition(self, nutrition_dict_unit_one, unit_multiplier):
+        """
+        Given nutritional information for one unit of ingredient and the multiplier, return the dictionary
+        of nutritional information post-multiplication
+        """
         nutrition_dict_multiplied = {}
         for nutrition in nutrition_dict_unit_one:
             value = nutrition_dict_unit_one[nutrition]
@@ -104,6 +115,9 @@ class Recipe():
         return nutrition_dict_multiplied
 
     def delete_note(self, note_number):
+        """
+        Deletes the note at a given index (assuming the value passed starts at 1)
+        """
         if note_number < 1 or note_number > len(self.notes):
             return "That's not a valid note to delete"
         else:
@@ -111,10 +125,17 @@ class Recipe():
         return note_deleted
 
     def add_note(self, note):
+        """
+        Adds the note to the note property
+        """
         self.notes.append(note)
         return self.notes
 
     def update_ingredients(self, ingredients):
+        """
+        Updates the ingredient amount of the recipe for all the ingredients passed and returns a 
+        statement indicating the details of the changes
+        """
         changed = []
         in_original_dict = False
         original_amount = 0
@@ -132,7 +153,7 @@ class Recipe():
                 if new_amount == float(0):
                     self.recipe_ingredients.pop(ingredient)
                 else: 
-                    self.recipe_ingredients[ingredient] = (round(float(amount_unit[:res]),2), amount_unit[res:])
+                    self.recipe_ingredients[ingredient] = (amount_unit[:res], amount_unit[res:])
 
             if in_original_dict:
                 changed_notice = f"{ingredient} amount was changed from {original_amount[0]} {original_amount[1]} to {self.recipe_ingredients[ingredient][0]} {self.recipe_ingredients[ingredient][1]}."
