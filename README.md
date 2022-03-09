@@ -1,3 +1,12 @@
+------------------------------------------------------------------------------------
+
+The goal of this web application is to create a backend API for a powerful recipe tracker that could be used by any avid cook. In addition to basic features, such as the ability to add or delete various recipies that are customary for such a tracker, this application also advances functionality to add notes, track nutrition information, fetch similar recipies, and return the simplest recipies given certain recipies.
+
+For technical details, this project was built on FastAPI and leverages an object-oriented system based on a RecipeBook and Recipe objects. This allows the application to be very extensible for future features.The project uses the CalorieNinja's API to gather base nutritional information on food items: https://calorieninjas.com/api.
+
+You can populate the initial database with my data from https://docs.google.com/spreadsheets/d/1Eb6jb7U4MfKtMcd6mUWBzg6taVfDT02F/edit?usp=sharing&ouid=103930868228310278871&rtpof=true&sd=true and put the resulting file in my project directory. If you need to permanently store recipes, you should do so within the Google Sheet. Unfortunately, given the time constraint on the project, I was not able to integrate this with a database like MongoDB or write data into the sheet but perhaps you'll see that in version 2!
+
+
 # Proposals
 
 My ideas for my final project are...
@@ -24,3 +33,4 @@ Week 6 – Finish some more functionality from Week 5, make ability to create us
 Week 7 - Figure out ideal database to store the recipes given (MongoDB for sheets?) and add functionality to RecipeBook object to read and populate from Mongo
  
 Week 8 – Host on Heroku? AWS? + continue/finish MongoDB
+
